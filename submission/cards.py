@@ -40,6 +40,35 @@ class Card:
     def from_raw(cls, suit: int, value: int):
         return cls(Suit(suit), Value(value))
 
+    @classmethod
+    def from_str(cls, card_str: str):
+        suit_map = {
+            "H": Suit.HEARTS,
+            "S": Suit.SPADES,
+            "D": Suit.DIAMONDS,
+            "C": Suit.CLUBS
+        }
+
+        value_map = {
+            "A": Value.ACE,
+            "2": Value.TWO,
+            "3": Value.THREE,
+            "4": Value.FOUR,
+            "5": Value.FIVE,
+            "6": Value.SIX,
+            "7": Value.SEVEN,
+            "8": Value.EIGHT,
+            "9": Value.NINE,
+            "T": Value.TEN,
+            "J": Value.JACK,
+            "Q": Value.QUEEN,
+            "K": Value.KING
+        }
+
+        suit = suit_map[card_str[0]]
+        value = value_map[card_str[1]]
+        return cls(suit, value)
+
     # Create list of cards from pandas Series row
     @classmethod
     def from_row(cls, row: pd.Series):
