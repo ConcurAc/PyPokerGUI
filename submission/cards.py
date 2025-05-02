@@ -1,31 +1,31 @@
 import pandas as pd
 from enum import Enum
 
-# Enum class for card suits
-class Suit(Enum):
-    HEARTS = 1
-    SPADES = 2
-    DIAMONDS = 3
-    CLUBS = 4
-
-# Enum class for card values
-class Value(Enum):
-    ACE = 1
-    TWO = 2
-    THREE = 3
-    FOUR = 4
-    FIVE = 5
-    SIX = 6
-    SEVEN = 7
-    EIGHT = 8
-    NINE = 9
-    TEN = 10
-    JACK = 11
-    QUEEN = 12
-    KING = 13
-
 # Class representing a playing card
 class Card:
+    # Enum class for card suits
+    class Suit(Enum):
+        HEARTS = 1
+        SPADES = 2
+        DIAMONDS = 3
+        CLUBS = 4
+
+    # Enum class for card values
+    class Value(Enum):
+        ACE = 1
+        TWO = 2
+        THREE = 3
+        FOUR = 4
+        FIVE = 5
+        SIX = 6
+        SEVEN = 7
+        EIGHT = 8
+        NINE = 9
+        TEN = 10
+        JACK = 11
+        QUEEN = 12
+        KING = 13
+
     # Initialize card with suit and value
     def __init__(self, suit: Suit, value: Value):
         self.suit = suit
@@ -38,31 +38,31 @@ class Card:
     # Create card from raw int values
     @classmethod
     def from_raw(cls, suit: int, value: int):
-        return cls(Suit(suit), Value(value))
+        return cls(Card.Suit(suit), Card.Value(value))
 
     @classmethod
     def from_str(cls, card_str: str):
         suit_map = {
-            "H": Suit.HEARTS,
-            "S": Suit.SPADES,
-            "D": Suit.DIAMONDS,
-            "C": Suit.CLUBS
+            "H": Card.Suit.HEARTS,
+            "S": Card.Suit.SPADES,
+            "D": Card.Suit.DIAMONDS,
+            "C": Card.Suit.CLUBS
         }
 
         value_map = {
-            "A": Value.ACE,
-            "2": Value.TWO,
-            "3": Value.THREE,
-            "4": Value.FOUR,
-            "5": Value.FIVE,
-            "6": Value.SIX,
-            "7": Value.SEVEN,
-            "8": Value.EIGHT,
-            "9": Value.NINE,
-            "T": Value.TEN,
-            "J": Value.JACK,
-            "Q": Value.QUEEN,
-            "K": Value.KING
+            "A": Card.Value.ACE,
+            "2": Card.Value.TWO,
+            "3": Card.Value.THREE,
+            "4": Card.Value.FOUR,
+            "5": Card.Value.FIVE,
+            "6": Card.Value.SIX,
+            "7": Card.Value.SEVEN,
+            "8": Card.Value.EIGHT,
+            "9": Card.Value.NINE,
+            "T": Card.Value.TEN,
+            "J": Card.Value.JACK,
+            "Q": Card.Value.QUEEN,
+            "K": Card.Value.KING
         }
 
         suit = suit_map[card_str[0]]
@@ -73,9 +73,9 @@ class Card:
     @classmethod
     def from_row(cls, row: pd.Series):
         return [
-            cls(Suit(row["S1"]), Value(row["C1"])),
-            cls(Suit(row["S2"]), Value(row["C2"])),
-            cls(Suit(row["S3"]), Value(row["C3"])),
-            cls(Suit(row["S4"]), Value(row["C4"])),
-            cls(Suit(row["S5"]), Value(row["C5"]))
+            cls(Card.Suit(row["S1"]), Card.Value(row["C1"])),
+            cls(Card.Suit(row["S2"]), Card.Value(row["C2"])),
+            cls(Card.Suit(row["S3"]), Card.Value(row["C3"])),
+            cls(Card.Suit(row["S4"]), Card.Value(row["C4"])),
+            cls(Card.Suit(row["S5"]), Card.Value(row["C5"]))
         ]
