@@ -27,18 +27,19 @@ class Card:
         KING = 13
 
     # Initialize card with suit and value
-    def __init__(self, suit: Suit, value: Value):
-        self.suit = suit
-        self.value = value
+    def __init__(self, suit: Suit | int, value: Value | int):
+        if isinstance(suit, Card.Suit):
+            self.suit = suit
+        else:
+            self.suit = Card.Suit(suit)
+        if isinstance(value, Card.Value):
+            self.value = value
+        else:
+            self.value = Card.Value(value)
 
     # String representation of card
     def __repr__(self) -> str:
         return f"{self.value.name} of {self.suit.name}"
-
-    # Create card from raw int values
-    @classmethod
-    def from_raw(cls, suit: int, value: int):
-        return cls(Card.Suit(suit), Card.Value(value))
 
     @classmethod
     def from_str(cls, card_str: str):
@@ -79,9 +80,9 @@ class Card:
     @classmethod
     def from_row(cls, row: pd.Series):
         return [
-            cls(Card.Suit(row["S1"]), Card.Value(row["C1"])),
-            cls(Card.Suit(row["S2"]), Card.Value(row["C2"])),
-            cls(Card.Suit(row["S3"]), Card.Value(row["C3"])),
-            cls(Card.Suit(row["S4"]), Card.Value(row["C4"])),
-            cls(Card.Suit(row["S5"]), Card.Value(row["C5"]))
+            cls(row["S1"], row["C1"]),
+            cls(row["S2"], row["C2"]),
+            cls(row["S3"], row["C3"]),
+            cls(row["S4"], row["C4"]),
+            cls(row["S5"], row["C5"])
         ]

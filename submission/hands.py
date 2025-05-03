@@ -30,36 +30,39 @@ def get_best_hand(cards):
     Returns:
         tuple: (Hand ranking enum, list of relevant cards for tiebreaking)
     """
-    consecutive = get_consecutive_cards(cards)
-    same = get_same_cards(cards)
-
+    consecutive = get_consecutive_values(cards)
+    same = get_same_values(cards)
     royal_flush = get_royal_flush(consecutive)
-    if royal_flush:
-        return Hand.ROYAL_FLUSH.with_cards(royal_flush)
+    if isinstance(royal_flush, Hand):
+        return royal_flush
     straight_flush = get_straight_flush(consecutive)
-    if straight_flush:
-        return Hand.STRAIGHT_FLUSH.with_cards(straight_flush)
+    if isinstance(straight_flush, Hand):
+        return straight_flush
     four_of_a_kind = get_four_of_a_kind(same)
-    if four_of_a_kind:
-        return Hand.FOUR_OF_A_KIND.with_cards(four_of_a_kind)
+    if isinstance(four_of_a_kind, Hand):
+        return four_of_a_kind
     full_house = get_full_house(same)
-    if full_house:
-        return Hand.FULL_HOUSE.with_cards(full_house)
+    if isinstance(full_house, Hand):
+        return full_house
+    flush = get_flush(cards)
+    if isinstance(flush, Hand):
+        return flush
+    straight = get_straight(consecutive)
+    if isinstance(straight, Hand):
+        return straight
     three_of_a_kind = get_three_of_a_kind(same)
-    if three_of_a_kind:
-        return Hand.THREE_OF_A_KIND.with_cards(three_of_a_kind)
+    if isinstance(three_of_a_kind, Hand):
+        return three_of_a_kind
     two_pair = get_two_pair(same)
-    if two_pair:
-        return Hand.TWO_PAIR.with_cards(two_pair)
+    if isinstance(two_pair, Hand):
+        return two_pair
     pair = get_pair(same)
-    if pair:
-        return Hand.PAIR.with_cards(pair)
+    if isinstance(pair, Hand):
+        return pair
     return Hand.HIGH_CARD, get_high_card(cards)
 
-def get_royal_flush(consecutive: list[list[Card]]) -> list[Card]:
+def get_royal_flush(consecutive: list[list[Card]]) -> Hand | None:
     for cards in consecutive:
-        if len(cards) < 5:
-            continue
         royal_flush_values = {
             Card.Value.ACE,
             Card.Value.KING,
@@ -75,56 +78,52 @@ def get_royal_flush(consecutive: list[list[Card]]) -> list[Card]:
             for card in cards:
                 if card.value in royal_flush_values:
                     suit_dict[card.suit] = suit_dict.get(card.suit, 0) + 1
-            for s, count in suit_dict.items():
-                if count >= 5:
-                    return list(filter(lambda card: card.value in royal_flush_values and card.suit == s, cards))
-    return []
 
-def get_straight_flush(consecutive: list[list[Card]]) -> list[Card]:
+            for suit, count in suit_dict.items():
+                if count >= 5:
+                    royal_cards = list(filter(lambda card: card.value in royal_flush_values and card.suit == suit, cards))
+                    return Hand.ROYAL_FLUSH.with_cards(royal_cards)
+    return None
+
+def get_straight_flush(consecutive: list[list[Card]]) -> Hand | None:
     """Get straight flush cards."""
     for cards in consecutive:
-        if len(cards) < 5:
-            continue
-        # Group cards by suit
-        suit_groups = {}
-        for card in cards:
-            if card.suit not in suit_groups:
-                suit_groups[card.suit] = []
-            suit_groups[card.suit].append(card)
-    return []
+        same = get_same_suit(cards)
+        common_suit = max(same, key=len)
+        if len(cards) >= 5:
+            if len(common_suit) >= 5:
+            # Check if it's a straight flush
+                straight_flush_cards = sorted(common_suit, key=lambda card: card.value.value)[-5:]
+                return Hand.STRAIGHT_FLUSH.with_cards(straight_flush_cards)
+    return None
 
-def get_flush(cards: list[Card]) -> list[Card]:
+def get_flush(cards: list[Card]) -> Hand | None:
     """Get flush cards."""
     # Group cards by suit
-    suit_groups = {}
-    for card in cards:
-        if card.suit not in suit_groups:
-            suit_groups[card.suit] = []
-        suit_groups[card.suit].append(card)
+    same = get_same_suit(cards)
+    common_suit = max(same, key=len)
+    if len(common_suit) >= 5:
+        # Check if it's a straight flush
+        flush_cards = sorted(common_suit, key=lambda card: card.value.value)[-5:]
+        return Hand.FLUSH.with_cards(flush_cards)
+    return None
 
-    # Find a suit with 5 or more cards
-    for suit, suited_cards in suit_groups.items():
-        if len(suited_cards) >= 5:
-            # Return the 5 highest cards of that suit
-            return sorted(suited_cards, key=lambda card: card.value.value)[len(suited_cards) - 5:]
-    return []
-
-def get_straight(consecutive: list[list[Card]]) -> list[Card]:
+def get_straight(consecutive: list[list[Card]]) -> Hand | None:
     """Get straight cards."""
     for cards in consecutive:
         if len(cards) >= 5:
-            return cards[len(cards) - 5:]
-    return []
+            return Hand.STRAIGHT.with_cards(cards[len(cards) - 5:])
+    return None
 
-def get_four_of_a_kind(same: list[list[Card]]) -> list[Card]:
+def get_four_of_a_kind(same: list[list[Card]]) -> Hand | None:
     """Get four of a kind cards."""
     for cards in same:
         if len(cards) >= 4:
-            return cards[len(cards) - 4:]
-    return []
+            return Hand.FOUR_OF_A_KIND.with_cards(cards[len(cards) - 4:])
+    return None
 
-def get_full_house(same: list[list[Card]]) -> list[Card]:
-    """Get three of a kind cards."""
+def get_full_house(same: list[list[Card]]) -> Hand | None:
+    """Get full house cards."""
     three_of_a_kind_index = None
     pair_index = None
     for i in range(len(same)):
@@ -137,17 +136,17 @@ def get_full_house(same: list[list[Card]]) -> list[Card]:
         if three_of_a_kind_index and pair_index:
             three_of_a_kind = same[three_of_a_kind_index]
             pair = same[pair_index]
-            return three_of_a_kind[len(three_of_a_kind) - 3:] + pair[len(pair) - 2:]
-    return []
+            return Hand.FULL_HOUSE.with_cards(three_of_a_kind[len(three_of_a_kind) - 3:] + pair[len(pair) - 2:])
+    return None
 
-def get_three_of_a_kind(same: list[list[Card]]) -> list[Card]:
+def get_three_of_a_kind(same: list[list[Card]]) -> Hand | None:
     """Get three of a kind cards."""
     for cards in same:
         if len(cards) >= 3:
-            return cards[len(cards) - 3:]
-    return []
+            return Hand.THREE_OF_A_KIND.with_cards(cards[len(cards) - 3:])
+    return None
 
-def get_two_pair(same: list[list[Card]]) -> list[Card]:
+def get_two_pair(same: list[list[Card]]) -> Hand | None:
     """Get two pair cards."""
     pair_indices = []
     for i in range(len(same)):
@@ -156,21 +155,49 @@ def get_two_pair(same: list[list[Card]]) -> list[Card]:
     if len(pair_indices) >= 2:
         pair1 = same[pair_indices[0]]
         pair2 = same[pair_indices[1]]
-        return pair1[len(pair1) - 2:] + pair2[len(pair2) - 2:]
-    return []
+        return Hand.TWO_PAIR.with_cards(pair1[len(pair1) - 2:] + pair2[len(pair2) - 2:])
+    return None
 
-def get_pair(same: list[list[Card]]) -> list[Card]:
+def get_pair(same: list[list[Card]]) -> Hand | None:
     """Get a pair of cards."""
     for cards in same:
         if len(cards) >= 2:
-            return cards[len(cards) - 2:]
-    return []
+            return Hand.PAIR.with_cards(cards[len(cards) - 2:])
+    return None
 
-def get_high_card(cards: list[Card]) -> list[Card]:
+def get_high_card(cards: list[Card]) -> Hand:
     """Get the highest card."""
-    return [max(cards, key=lambda card: card.value.value)]
+    return Hand.HIGH_CARD.with_cards([max(cards, key=lambda card: card.value.value)])
 
-def get_consecutive_cards(cards: list[Card]) -> list[list[Card]]:
+def get_same_suit(cards: list[Card]) -> list[list[Card]]:
+    """Get cards of the same suit."""
+    cards = sorted(cards, key=lambda card: card.suit.value)
+    groups = []
+    skip = 0
+    for i in range(len(cards) - 1):
+        if skip > 0:
+            skip -= 1
+            continue
+        same = [cards[i]]
+        for j in range(1, len(cards) - i):
+            if cards[i].suit == cards[i + j].suit:
+                same.append(cards[i + j])
+                skip += 1
+        if len(same) > 1:
+            groups.append(same)
+    return groups[::-1]
+
+def get_missing_suit(cards: list[Card]) -> list[Card]:
+    """Get missing cards of the same suit."""
+    cards = sorted(cards, key=lambda card: card.suit.value)
+    common_suit = max(get_same_suit(cards), key=len)[0].suit
+    missing_suits = []
+    for card in cards:
+        if common_suit != card.suit:
+            missing_suits.append(Card(common_suit, card.value))
+    return missing_suits
+
+def get_consecutive_values(cards: list[Card]) -> list[list[Card]]:
     """Get consecutive cards."""
     cards = sorted(cards, key=lambda card: card.value.value)
     groups = []
@@ -181,16 +208,30 @@ def get_consecutive_cards(cards: list[Card]) -> list[list[Card]]:
             continue
         consecutive = [cards[i]]
         for j in range(1, len(cards) - i):
-            if (cards[i].value.value + j) % len(Hand) == cards[i + j].value.value:
+            if cards[i].value.value + j == cards[i + j].value.value:
                 consecutive.append(cards[i + j])
                 skip += 1
         if len(consecutive) > 1:
             groups.append(consecutive)
     return groups[::-1]
 
+def get_missing_consecutive(cards: list[Card]) -> list[list[Card]]:
+    """Get missing consecutive cards."""
+    cards = sorted(cards, key=lambda card: card.value.value)
+    common_suit = max(get_same_suit(cards), key=len)[0].suit
+    groups = []
+    for i in range(len(cards)):
+        missing_consecutive = []
+        value = (cards[i].value.value + 1) % len(Hand)
+        while value != cards[(i + 1) % len(cards)].value.value:
+            missing_consecutive.append(Card(common_suit, value))
+            value = (value + 1) % len(Hand)
+        if len(missing_consecutive) > 0:
+            groups.append(missing_consecutive)
+    return groups[::-1]
 
-def get_same_cards(cards) -> list[list[Card]]:
-    """Get same cards."""
+def get_same_values(cards) -> list[list[Card]]:
+    """Get cards with same value."""
     cards = sorted(cards, key=lambda card: card.value.value)
     groups = []
     skip = 0
