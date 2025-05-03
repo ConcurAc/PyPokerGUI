@@ -20,7 +20,7 @@ class Hand(Enum):
         self.cards = cards
         return self
 
-def get_best_hand(cards):
+def get_best_hand(cards) -> Hand:
     """
     Determine the highest poker hand ranking for a list of cards.
 
@@ -59,7 +59,26 @@ def get_best_hand(cards):
     pair = get_pair(same)
     if isinstance(pair, Hand):
         return pair
-    return Hand.HIGH_CARD, get_high_card(cards)
+    return get_high_card(cards)
+
+def score_closest_hand(cards: list[Card]) -> float:
+    """Score the closest hand."""
+    consecutive = get_consecutive_values(cards)
+    same_suit = get_same_suit(cards)
+    same_value = get_same_values(cards)
+
+    longest = max(consecutive, key=len)
+    common_suit = max(same_suit, key=len)
+    common_value = max(same_value, key=len)
+
+    longest_score = 4.0 * len(longest) / 5.0
+    common_suit_score = 5.0 * len(common_suit) / 4.0
+    common_value_score = 6.0 * len(common_value) / 5.0
+
+    print(f"longest_score: {longest_score}")
+    print(f"common_suit_score: {common_suit_score}")
+    print(f"common_value_score: {common_value_score}")
+    return longest_score + common_suit_score + common_value_score
 
 def get_royal_flush(consecutive: list[list[Card]]) -> Hand | None:
     for cards in consecutive:
@@ -230,7 +249,7 @@ def get_missing_consecutive(cards: list[Card]) -> list[list[Card]]:
             groups.append(missing_consecutive)
     return groups[::-1]
 
-def get_same_values(cards) -> list[list[Card]]:
+def get_same_values(cards: list[Card]) -> list[list[Card]]:
     """Get cards with same value."""
     cards = sorted(cards, key=lambda card: card.value.value)
     groups = []
