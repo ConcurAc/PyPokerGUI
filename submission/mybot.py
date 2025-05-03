@@ -15,7 +15,7 @@ class MyBot(BasePokerPlayer):  # Do not forget to make parent class as "BasePoke
 
     def __init__(self):
         self.confidence_threshold = 0.7  # High confidence threshold
-        self.aggression_factor = 0.2     # Reduced aggression (was 0.3)
+        self.aggression_factor = 0.3     # Reduced aggression (was 0.3)
         self.bluff_threshold = 0.05      # Reduced bluffing (was 0.1)
         self.position_weights = {        # Value of position (late positions are better)
             'early': 0.8,
@@ -36,7 +36,7 @@ class MyBot(BasePokerPlayer):  # Do not forget to make parent class as "BasePoke
         pot = round_state['pot']['main']['amount']
         call_amount = valid_actions[1]['amount']
         seats = round_state.get('seats', [])  # Added .get() to prevent unbound error
-
+        valid_actions[2]['amount']['max'] *= 0.5
         # Quick check for can check/fold scenarios
         if call_amount == 0:
             return 'call', 0  # Always check when possible
