@@ -19,7 +19,7 @@ class Hand(Enum):
         self.cards = cards
         return self
 
-def get_hand_rank(cards):
+def get_best_hand(cards):
     """
     Determine the highest poker hand ranking for a list of cards.
 
@@ -205,5 +205,3 @@ def get_same_cards(cards) -> list[list[Card]]:
         if len(same) > 1:
             groups.append(same)
     return groups
-
-if __name__ == "__main__":
