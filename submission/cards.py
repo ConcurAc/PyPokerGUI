@@ -64,9 +64,15 @@ class Card:
             "Q": Card.Value.QUEEN,
             "K": Card.Value.KING
         }
-
-        suit = suit_map[card_str[0]]
-        value = value_map[card_str[1]]
+        try:
+            suit = suit_map[card_str[0]]
+            value = value_map[card_str[1]]
+        except KeyError:
+            try:
+                suit = suit_map[card_str[1]]
+                value = value_map[card_str[0]]
+            except KeyError:
+                raise ValueError(f"Invalid card string: {card_str}")
         return cls(suit, value)
 
     # Create list of cards from pandas Series row
