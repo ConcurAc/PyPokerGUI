@@ -15,6 +15,7 @@ class Hand(Enum):
     FOUR_OF_A_KIND = 7  # Four cards of same value
     STRAIGHT_FLUSH = 8  # Straight of same suit
     ROYAL_FLUSH = 9     # Ace-high straight flush
+
     def with_cards(self, cards):
         self.cards = cards
         return self
@@ -180,7 +181,7 @@ def get_consecutive_cards(cards: list[Card]) -> list[list[Card]]:
             continue
         consecutive = [cards[i]]
         for j in range(1, len(cards) - i):
-            if cards[i].value.value + j == cards[i + j].value.value:
+            if (cards[i].value.value + j) % len(Hand) == cards[i + j].value.value:
                 consecutive.append(cards[i + j])
                 skip += 1
         if len(consecutive) > 1:
