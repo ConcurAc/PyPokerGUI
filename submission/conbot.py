@@ -9,9 +9,9 @@ from pypokerengine.api.emulator import Emulator
 NB_SIMULATION = 100  # Number of monte carlo simulations for win rate estimation
 
 def setup_ai():
-    return MyBot()
+    return ConservativeBot()
 
-class MyBot(BasePokerPlayer):  # Do not forget to make parent class as "BasePokerPlayer"
+class ConservativeBot(BasePokerPlayer):  # Do not forget to make parent class as "BasePokerPlayer"
 
     def __init__(self):
         self.confidence_threshold = 0.7  # High confidence threshold
@@ -36,7 +36,7 @@ class MyBot(BasePokerPlayer):  # Do not forget to make parent class as "BasePoke
         pot = round_state['pot']['main']['amount']
         call_amount = valid_actions[1]['amount']
         seats = round_state.get('seats', [])  # Added .get() to prevent unbound error
-        valid_actions[2]['amount']['max'] *= 0.5
+        valid_actions[2]['amount']['max'] //= 2
         # Quick check for can check/fold scenarios
         if call_amount == 0:
             return 'call', 0  # Always check when possible
